@@ -10,10 +10,10 @@ Keys = {
 }
 
 ESX                           = nil
+local hasbag                  = false
+local MinPolice = 0
 
 local robberyOngoing = false
-
-local MinPolice = 2
 
 Citizen.CreateThread(function ()
     while ESX == nil do
@@ -66,7 +66,7 @@ BankHeists = {
 
     ["Fleeca_Bank_Center"] = {
 
-        ["Money"] = 150000,
+        ["Money"] = 20000,
 
         ["Bank_Vault"] = {
             ["model"] = 2121050683,
@@ -84,7 +84,8 @@ BankHeists = {
             ["h"] = 218.72334289551
         },
 
-        ["Cash_Pile"] = { ["x"] = 148.67572021484, ["y"] = -1049.197265625, ["z"] = 29.93883895874, ["h"] = 160.95620727539 }
+        ["Cash_Pile"] = { ["x"] = 148.67572021484, ["y"] = -1049.197265625, ["z"] = 29.93883895874, ["h"] = 160.95620727539 },
+        ["Bags"] = { ["x"] = 150.79, ["y"] = -1046.19, ["z"] = 28.44, ["h"] = 67.99 }
 
 
     },
@@ -188,6 +189,7 @@ function StartRobbery(bankId)
     robberyOngoing = true
 
     local CashPosition = BankHeists[bankId]["Cash_Pile"]
+    local BagPosition = BankHeists[bankId]["Bags"]
 
     loadModel("bkr_prop_bkr_cashpile_04")
     loadAnimDict("anim@heists@ornate_bank@grab_cash_heels")
@@ -198,6 +200,12 @@ function StartRobbery(bankId)
     FreezeEntityPosition(CashPile, true)
     SetEntityAsMissionEntity(CashPile, true, true)
 
+    local Bags = CreateObject(GetHashKey("prop_cs_heist_bag_01"), BagPosition["x"], BagPosition["y"], BagPosition["z"], false)
+    PlaceObjectOnGroundProperly(Bag)
+    SetEntityRotation(Bag, 0, 0, BagPosition["h"], 2)
+    FreezeEntityPosition(Bag, false)
+    SetEntityAsMissionEntity(Bag, true, true)
+
     Citizen.CreateThread(function()
         while robberyOngoing do
             Citizen.Wait(5)
@@ -207,8 +215,30 @@ function StartRobbery(bankId)
             local ped = PlayerPedId()
             local pedCoords = GetEntityCoords(ped)
             local distanceCheck = GetDistanceBetweenCoords(pedCoords, CashPosition["x"], CashPosition["y"], CashPosition["z"], false)
+            local distanceCheck2 = GetDistanceBetweenCoords(pedCoords, BagPosition["x"], BagPosition["y"], BagPosition["z"], false)
+            local bag = {['bags_1'] = 44, ['bags_2'] = 0}
+            local bagdone = {['bags_1'] = 45, ['bags_2'] = 0}
+
+            if hasbag == false then
+            if distanceCheck2 <= 1.5 then
+                ESX.Game.Utils.DrawText3D({ x = BagPosition["x"], y = BagPosition["y"], z = BagPosition["z"] }, "[E] Grab Bag ", 0.4)
+                if IsControlJustPressed(0, Keys["E"]) then
+                    hasbag = true
+                    TriggerEvent('skinchanger:getSkin', function(skin)
+        
+                            if skin.sex == 0 then
+                                TriggerEvent('skinchanger:loadClothes', skin, bag)
+                            else
+                                TriggerEvent('skinchanger:loadClothes', skin, bag)
+                            end
+                        end)
+                    end
+                end
+            end
 
             if distanceCheck <= 1.5 then
+                if robberyOngoing == true then
+                    if hasbag == true then
                 ESX.Game.Utils.DrawText3D({ x = CashPosition["x"], y = CashPosition["y"], z = CashPosition["z"] }, "[E] Grab " .. Cash, 0.4)
                 if IsControlJustPressed(0, Keys["E"]) then
 
@@ -216,21 +246,34 @@ function StartRobbery(bankId)
                         GrabCash(bankId)
                     else
                         DeleteEntity(CashPile)
+                        DeleteEntity(Bags)
 
                         BankHeists[bankId]["Money"] = 0
 
                         ESX.ShowNotification("Everything is already recieved!")
 
                         TriggerServerEvent("esx_bankrobbery:endRobbery", bankId)
+                        TriggerEvent('skinchanger:getSkin', function(skin)
+        
+                            if skin.sex == 0 then
+                                TriggerEvent('skinchanger:loadClothes', skin, bagdone)
+                            else
+                                TriggerEvent('skinchanger:loadClothes', skin, bagdone)
+                            end
+                        end)
                     end
                 end
             end
 
             if IsControlJustPressed(0, Keys["X"]) then
                 DeleteEntity(CashPile)
+                DeleteEntity(Bags)
+                robberyOngoing = false
+                hasbag = false
             end
-
         end
+        end
+    end
     end)
 
 end
