@@ -13,6 +13,8 @@ ESX                           = nil
 
 local robberyOngoing = false
 
+local MinPolice = 2
+
 Citizen.CreateThread(function ()
     while ESX == nil do
         TriggerEvent('esx:getSharedObject', function(obj) 
@@ -145,7 +147,13 @@ Citizen.CreateThread(function()
                     if distanceCheck <= 1.5 then
 
                         if IsControlJustPressed(0, Keys["E"]) then
-                            TriggerServerEvent("esx_bankrobbery:startRobbery", bank)
+                            ESX.TriggerServerCallback("esx_bankrobbery:fetchCops", function(IsEnough)
+                                if IsEnough then
+                                    TriggerServerEvent("esx_bankrobbery:startRobbery", bank)
+                                else
+                                    ESX.ShowNotification("There is not enough policemen!")
+                                end
+                            end, MinPolice)
                         end
                     end
                 end

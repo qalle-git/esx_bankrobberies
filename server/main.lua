@@ -36,3 +36,23 @@ AddEventHandler("esx_bankrobbery:grabbedCash", function(bankId, oldCash, newCash
 
     TriggerClientEvent("esx_bankrobbery:changeCash", -1, bankId, oldCash - newCash)
 end)
+
+ESX.RegisterServerCallback("esx_bankrobbery:fetchCops", function(source, cb, minCops)
+    local copsOnDuty = 0
+
+    local Players = ESX.GetPlayers()
+
+    for i = 1, #Players do
+        local xPlayer = ESX.GetPlayerFromId(Players[i])
+
+        if xPlayer["job"]["name"] == "police" then
+            copsOnDuty = copsOnDuty + 1
+        end
+    end
+
+    if copsOnDuty >= minCops then
+        cb(true)
+    else
+        cb(false)
+    end
+end)
