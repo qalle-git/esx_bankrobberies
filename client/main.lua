@@ -66,7 +66,7 @@ BankHeists = {
 
     ["Fleeca_Bank_Center"] = {
 
-        ["Money"] = 20000,
+        ["Money"] = 150000,
 
         ["Bank_Vault"] = {
             ["model"] = 2121050683,
