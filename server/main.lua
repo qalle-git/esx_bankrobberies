@@ -23,7 +23,7 @@ end)
 RegisterServerEvent("esx_bankrobbery:endRobbery")
 AddEventHandler("esx_bankrobbery:endRobbery", function(bankId)
     TriggerClientEvent("esx_bankrobbery:endRobbery", -1, bankId)
-    TriggerClientEvent('esx_holdupbank:killblip', xPlayers[i])
+    TriggerClientEvent('esx_bankrobberies:killblip', xPlayers[i])
 end)
 
 RegisterServerEvent("esx_bankrobbery:grabbedCash")
@@ -36,7 +36,7 @@ AddEventHandler("esx_bankrobbery:grabbedCash", function(bankId, oldCash, newCash
     TriggerClientEvent("esx:showNotification", src, "You recieved " .. newCash .. " dirty cash")
 
     TriggerClientEvent("esx_bankrobbery:changeCash", -1, bankId, oldCash - newCash)
-    TriggerClientEvent('esx_holdupbank:killblip', xPlayers[i])
+    TriggerClientEvent('esx_bankrobberies:killblip', xPlayers[i])
 end)
 
 ESX.RegisterServerCallback("esx_bankrobbery:fetchCops", function(source, cb, minCops)
