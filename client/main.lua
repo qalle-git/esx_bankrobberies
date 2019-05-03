@@ -13,7 +13,9 @@ ESX                           = nil
 
 local robberyOngoing = false
 
-local MinPolice = 2
+local MinPolice = 0
+
+local blip = nil
 
 Citizen.CreateThread(function ()
     while ESX == nil do
@@ -28,6 +30,11 @@ Citizen.CreateThread(function ()
         ESX.PlayerData = ESX.GetPlayerData()
     end
 end) 
+
+RegisterNetEvent('esx_bankrobberies:killblip')
+AddEventHandler('esx_bankrobberies:killblip', function()
+    RemoveBlip(blip)
+end)
 
 RegisterNetEvent('esx:setJob')
 AddEventHandler('esx:setJob', function(job)
@@ -166,12 +173,16 @@ end)
 
 RegisterNetEvent("esx_bankrobbery:startRobbery")
 AddEventHandler("esx_bankrobbery:startRobbery", function(bankId)
+    RemoveBlip(blip)
+    DeleteEntity(CashPile)
     StartRobbery(bankId)
 end)
 
 RegisterNetEvent("esx_bankrobbery:endRobbery")
 AddEventHandler("esx_bankrobbery:endRobbery", function(bankId)
     robberyOngoing = false
+    DeleteEntity(CashPile)
+    RemoveBlip(blip)
 end)
 
 RegisterNetEvent("esx_bankrobbery:changeCash")
@@ -184,7 +195,7 @@ AddEventHandler("esx_bankrobbery:changeCash", function(bankId, newCash)
 end)
 
 function StartRobbery(bankId)
-
+    DeleteEntity(CashPile)
     robberyOngoing = true
 
     local CashPosition = BankHeists[bankId]["Cash_Pile"]
@@ -222,6 +233,7 @@ function StartRobbery(bankId)
                         ESX.ShowNotification("Everything is already recieved!")
 
                         TriggerServerEvent("esx_bankrobbery:endRobbery", bankId)
+                        RemoveBlip(blip)
                     end
                 end
             end
@@ -245,6 +257,7 @@ function GrabCash(bankId)
     local cashRecieved = math.random(5000, 7000)
 
     TriggerServerEvent("esx_bankrobbery:grabbedCash", bankId, BankHeists[bankId]["Money"], cashRecieved)
+    DeleteEntity(CashPile)
 end
 
 function loadAnimDict(dict)
